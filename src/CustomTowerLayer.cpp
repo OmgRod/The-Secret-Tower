@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include "CustomTowerLayer.hpp"
+#include "Geode/utils/SeedValue.hpp"
 
 using namespace geode::prelude;
 
@@ -56,28 +57,60 @@ bool CustomTowerLayer::init(bool returning, bool nextFloorLocked) {
 
     if (auto menu = this->getChildByID("main-node")->getChildByID("main-menu")) {
         CCMenuItemSpriteExtra* level5001 = typeinfo_cast<CCMenuItemSpriteExtra*>(menu->getChildByID("level-5001-button"));
-        level5001->m_pfnSelector = menu_selector(CustomTowerLayer::playLevel5001);
+        level5001->setID("level-5005-button");
+        level5001->setTag(5005);
+        level5001->m_pfnSelector = menu_selector(CustomTowerLayer::onDoor);
 
         CCMenuItemSpriteExtra* level5002 = typeinfo_cast<CCMenuItemSpriteExtra*>(menu->getChildByID("level-5002-button"));
-        level5002->m_pfnSelector = menu_selector(CustomTowerLayer::playLevel5002);
+        level5002->setID("level-5006-button");
+        level5002->setTag(5006);
+        level5002->m_pfnSelector = menu_selector(CustomTowerLayer::onDoor);
 
         CCMenuItemSpriteExtra* level5003 = typeinfo_cast<CCMenuItemSpriteExtra*>(menu->getChildByID("level-5003-button"));
-        level5003->m_pfnSelector = menu_selector(CustomTowerLayer::playLevel5003);
+        level5003->setID("level-5007-button");
+        level5003->setTag(5007);
+        level5003->m_pfnSelector = menu_selector(CustomTowerLayer::onDoor);
 
         CCMenuItemSpriteExtra* level5004 = typeinfo_cast<CCMenuItemSpriteExtra*>(menu->getChildByID("level-5004-button"));
-        level5004->m_pfnSelector = menu_selector(CustomTowerLayer::playLevel5004);
+        level5004->setID("level-5008-button");
+        level5004->setTag(5008);
+        level5004->m_pfnSelector = menu_selector(CustomTowerLayer::onDoor);
     }
 
     return true;
 }
 
-void CustomTowerLayer::playLevel5001(CCObject* sender) {
-    auto level = GJGameLevel::create();
-    level->m_levelID = 5005;
-    level->m_levelName = "The Foolish Tower";
-    level->m_songID = 10003039;
+struct LevelData {
+    int levelID;
+    std::string name;
+    int songID;
+    int moons;
+};
 
-    const auto& levelPath = Mod::get()->getResourcesDir() / "5005.txt";
+static const std::unordered_map<int, LevelData> levelMap = {
+    {5005, {5005, "The Foolish Tower", 10003039, 0}},
+    {5006, {5006, "The Deep Sewers", 10003040, 0}},
+    {5007, {5007, "The Lost Cellar", 10002875, 0}},
+    {5008, {5008, "The Sneaky Hollow", 10000749, 0}},
+};
+
+void CustomTowerLayer::onDoor(CCObject* sender) {
+    auto it = levelMap.find(sender->getTag());
+    if (it == levelMap.end()) {
+        log::error("Level ID not found: {}", sender->getTag());
+        return;
+    }
+
+    const auto& data = it->second;
+    auto level = GJGameLevel::create();
+    level->m_levelID = data.levelID;
+    level->m_levelType = GJLevelType::Saved;
+    level->m_autoLevel = false;
+    level->m_stars = data.moons;
+    level->m_levelName = data.name;
+    level->m_songID = data.songID;
+
+    const auto& levelPath = Mod::get()->getResourcesDir() / (std::to_string(sender->getTag()) + ".txt");
     if (!std::filesystem::exists(levelPath)) {
         log::error("Level file does not exist: {}", levelPath);
         return;
@@ -93,84 +126,24 @@ void CustomTowerLayer::playLevel5001(CCObject* sender) {
     buffer << file.rdbuf();
     level->m_levelString = buffer.str();
 
-    auto scene = CCTransitionFade::create(0.5f, PlayLayer::scene(level, false, false));
-    CCDirector::sharedDirector()->pushScene(scene);
-}
-
-void CustomTowerLayer::playLevel5002(CCObject* sender) {
-    auto level = GJGameLevel::create();
-    level->m_levelID = 5006;
-    level->m_levelName = "The Deep Sewers";
-    level->m_songID = 10003040;
-
-    const auto& levelPath = Mod::get()->getResourcesDir() / "5006.txt";
-    if (!std::filesystem::exists(levelPath)) {
-        log::error("Level file does not exist: {}", levelPath);
-        return;
-    }
-
-    std::ifstream file(levelPath);
-    if (!file) {
-        log::error("Failed to open level file: {}", levelPath);
-        return;
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    level->m_levelString = buffer.str();
+    FMODAudioEngine::get()->playEffect("playSound_01.ogg", 1.f, 1.f, 0.5f);
 
     auto scene = CCTransitionFade::create(0.5f, PlayLayer::scene(level, false, false));
     CCDirector::sharedDirector()->pushScene(scene);
 }
 
-void CustomTowerLayer::playLevel5003(CCObject* sender) {
-    auto level = GJGameLevel::create();
-    level->m_levelID = 5007;
-    level->m_levelName = "The Lost Cellar";
-    level->m_songID = 10002875;
+// void CustomTowerLayer::playLevel5005(CCObject*) {
+//     playTowerLevel(5005);
+// }
 
-    const auto& levelPath = Mod::get()->getResourcesDir() / "5007.txt";
-    if (!std::filesystem::exists(levelPath)) {
-        log::error("Level file does not exist: {}", levelPath);
-        return;
-    }
+// void CustomTowerLayer::playLevel5006(CCObject*) {
+//     playTowerLevel(5006);
+// }
 
-    std::ifstream file(levelPath);
-    if (!file) {
-        log::error("Failed to open level file: {}", levelPath);
-        return;
-    }
+// void CustomTowerLayer::playLevel5007(CCObject*) {
+//     playTowerLevel(5007);
+// }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    level->m_levelString = buffer.str();
-
-    auto scene = CCTransitionFade::create(0.5f, PlayLayer::scene(level, false, false));
-    CCDirector::sharedDirector()->pushScene(scene);
-}
-
-void CustomTowerLayer::playLevel5004(CCObject* sender) {
-    auto level = GJGameLevel::create();
-    level->m_levelID = 5008;
-    level->m_levelName = "The Sneaky Hollow";
-    level->m_songID = 10000749;
-
-    const auto& levelPath = Mod::get()->getResourcesDir() / "5008.txt";
-    if (!std::filesystem::exists(levelPath)) {
-        log::error("Level file does not exist: {}", levelPath);
-        return;
-    }
-
-    std::ifstream file(levelPath);
-    if (!file) {
-        log::error("Failed to open level file: {}", levelPath);
-        return;
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    level->m_levelString = buffer.str();
-
-    auto scene = CCTransitionFade::create(0.5f, PlayLayer::scene(level, false, false));
-    CCDirector::sharedDirector()->pushScene(scene);
-}
+// void CustomTowerLayer::playLevel5008(CCObject*) {
+//     playTowerLevel(5008);
+// }

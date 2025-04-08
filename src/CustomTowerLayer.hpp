@@ -9,8 +9,9 @@ public:
     static CCScene* scene();
     static CustomTowerLayer* create();
     bool init(bool p0, bool nextFloorLocked = false);
-    void playLevel5001(CCObject* sender);
-    void playLevel5002(CCObject* sender);
-    void playLevel5003(CCObject* sender);
-    void playLevel5004(CCObject* sender);
+    // void playLevel5005(CCObject* sender);
+    // void playLevel5006(CCObject* sender);
+    // void playLevel5007(CCObject* sender);
+    // void playLevel5008(CCObject* sender);
+    void onDoor(CCObject* sender);
 };

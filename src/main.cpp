@@ -17,7 +17,7 @@ class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
 			auto secondFloorBtn = CCMenuItemSpriteExtra::create(
 				CCSprite::create("floor2Btn.png"_spr),
 				this,
-				menu_selector(MyLevelAreaInnerLayer::secondFloor)
+				menu_selector(MyLevelAreaInnerLayer::onNextFloor)
 			);
 			secondFloorBtn->setPosition(secondFloorBtnOld->getPosition());
 			secondFloorBtn->setID("second-floor-button-enabled");
@@ -28,7 +28,7 @@ class $modify(MyLevelAreaInnerLayer, LevelAreaInnerLayer) {
 		return true;
 	}
 
-	void secondFloor(CCObject* sender) {
+	void onNextFloor(CCObject* sender) {
 		auto scenePrev = CCTransitionFade::create(0.5f, CustomTowerLayer::scene());
         CCDirector::sharedDirector()->pushScene(scenePrev);
 	}
