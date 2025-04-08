@@ -1,0 +1,28 @@
+{
+	"geode": "4.3.1",
+	"gd": {
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
+	},
+	"id": "omgrod.the-secret-tower",
+	"name": "The Secret Tower",
+	"version": "v1.0.0",
+	"developer": "OmgRod",
+	"description": "GD Colon's 2025 April Fools in GD",
+	"resources": {
+		"sprites": [
+			"res/*.png"
+		],
+		"files": [
+			"res/levels/*.txt"
+		]
+	},
+	"dependencies": {
+		"geode.node-ids": {
+			"version": ">=v1.20.1",
+			"importance": "required"
+		}
+	}
+}
